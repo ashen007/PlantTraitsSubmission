@@ -28,7 +28,7 @@ class VGG(nn.Module):
 
         pre_trained_w = vgg16_bn(pretrained=True)
         self.feat_extractor = nn.Sequential(*(list(pre_trained_w.children())[:-2]))
-        self.fc_branch = FullyConnected(163, 512)
+        self.fc_branch = FullyConnected(487, 512)
         self.avgpool = nn.AvgPool2d(3)
         self.classifier = nn.Sequential(nn.Linear(1024, 512),
                                         nn.BatchNorm1d(512),
@@ -52,7 +52,7 @@ class VGG(nn.Module):
 
 if __name__ == '__main__':
     dataset = PlantTraitDataset('../data', '../data/processed')
-    x, y = next(iter(DataLoader(dataset, 16, True)))
+    x, y = next(iter(DataLoader(dataset, 32, True)))
     m = VGG(3)
     main, aux = m(x)
 

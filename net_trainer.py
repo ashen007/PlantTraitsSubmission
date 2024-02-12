@@ -28,8 +28,8 @@ class Config:
         self.lr = 0.0001
         self.model = model
         self.optimizer = AdamW(self.model.parameters(), lr=self.lr)
-        # self.scheduler = ExponentialLR(self.optimizer, gamma=0.01) # only for tuning
-        self.scheduler = ReduceLROnPlateau(self.optimizer, factor=0.1)
+        self.scheduler = ExponentialLR(self.optimizer, gamma=0.01) # only for tuning
+        # self.scheduler = ReduceLROnPlateau(self.optimizer, factor=0.1)
         self.multi_in = multi_in
         self.loss = loss
         self.epochs = epochs

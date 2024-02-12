@@ -7,12 +7,18 @@ import pandas as pd
 import torch
 
 from torchvision import io
-from torchvision.transforms.v2 import Compose, Resize
+from torchvision.transforms.v2 import (Compose,
+                                       CenterCrop,
+                                       RandomCrop,
+                                       RandomHorizontalFlip,
+                                       )
 from torch.utils.data import Dataset, DataLoader
 
 
 class PlantTraitDataset(Dataset):
-    TRANSFORMER = Compose([Resize(96)])
+    TRANSFORMER = Compose([CenterCrop(300),
+                           RandomCrop(128),
+                           RandomHorizontalFlip()])
 
     def __init__(self, path, anno):
         self.dir = os.path.join(path, 'train_images')
@@ -33,8 +39,8 @@ class PlantTraitDataset(Dataset):
         ys_2 = self.df.loc[idx, columns[-6:]].values
         ys_2 = torch.tensor(ys_2, dtype=torch.float32)
 
-        img = torch.tensor(io.read_image(f'{self.dir}/{img_id}.jpeg'), dtype=torch.float32) / 255.
-        # img = (img - img.mean()) / img.std()
+        img = torch.tensor(io.read_image(f'{self.dir}/{img_id}.jpeg'), dtype=torch.float32)
+        img = (img - img.mean()) / img.std()
 
         img = self.TRANSFORMER(img)
 
