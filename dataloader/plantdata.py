@@ -23,23 +23,31 @@ class PlantTraitDataset(Dataset):
 
     def __getitem__(self, idx):
         columns = self.df.columns
+
         img_id = self.df.loc[idx, 'id']
-        ys = self.df.loc[idx, columns[-6:]].values
-        ys = torch.tensor(ys, dtype=torch.float32)
+        xs = self.df.loc[idx, columns[1: -12]].values
+        xs = torch.tensor(xs, dtype=torch.float32)
+
+        ys_1 = self.df.loc[idx, columns[-12:-6]].values
+        ys_1 = torch.tensor(ys_1, dtype=torch.float32)
+        ys_2 = self.df.loc[idx, columns[-6:]].values
+        ys_2 = torch.tensor(ys_2, dtype=torch.float32)
 
         img = torch.tensor(io.read_image(f'{self.dir}/{img_id}.jpeg'), dtype=torch.float32) / 255.
         # img = (img - img.mean()) / img.std()
 
         img = self.TRANSFORMER(img)
 
-        return img, ys
+        return (img, xs), (ys_1, ys_2)
 
 
 if __name__ == '__main__':
     dataset = PlantTraitDataset('../data', '../data/processed')
-    loader = DataLoader(dataset, 16, True)
+    loader = DataLoader(dataset, 1, True)
 
-    x, y = next(iter(loader))
+    xs, ys = next(iter(loader))
 
-    print(x.shape)
-    print(y)
+    print(xs[0].shape)
+    print(xs[1].shape)
+    print(ys[0].shape)
+    print(ys[1].shape)

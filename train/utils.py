@@ -47,14 +47,10 @@ def get_scores(*, model, optimizer, epoch,
 
 def do_training(*, model, optimizer, inputs, labels, loss_func, multi_out=False):
     if multi_out:
-        y_hat = model(inputs)
-        loss = loss_func(y_hat, labels)
-        # loss = 0
-        # y_hat = y_hats[0.55]
-        #
-        # for k, v in y_hats.items():
-        #     loss_ = loss_func(v, labels)
-        #     loss += loss_
+        y_hat_m, y_hat_a = model(inputs)
+        loss = loss_func(y_hat_m, labels[0]) + loss_func(y_hat_a, labels[1])
+        y_hat = torch.concat((y_hat_m, y_hat_a), dim=1)
+
     else:
         y_hat = model(inputs)  # this just computed f_Θ(x(i))
         loss = loss_func(y_hat, labels)  # Compute loss.
@@ -206,7 +202,7 @@ def train_loop(model, loss_func,
 
     total_train_time = 0  # How long have we spent in the training loop?
     results = {}
-    current_best = 100000
+    current_best = 1e10
 
     # Initialize every item with an empty list
     for item in to_track:
