@@ -1,11 +1,12 @@
 import os
-
+import numpy as np
 import torch
 import pandas as pd
 import tqdm
 from torchvision.io import read_image
 from torchvision.transforms import functional as F
 from models.vgg import VGG
+from prepare import sin_transformer, cos_transformer
 
 if __name__ == '__main__':
     # load model
@@ -13,14 +14,13 @@ if __name__ == '__main__':
     model = VGG(3)
     model.load_state_dict(state['model_state_dict'])
 
-    df = pd.read_csv('../../data/test.csv', index_col='id')
-    df[df.columns] = (df[df.columns] - df[df.columns].min()) / (df[df.columns].max() - df[df.columns].min())
-
+    df = pd.read_csv('../../data/test.csv')
+    df[df.columns[1:]] = df[df.columns[1:]].apply(lambda x: (x - np.min(x))/(np.max(x) - np.min(x)), axis=1)
     preds = []
 
     for f in tqdm.tqdm(os.listdir('../../data/test_images')):
         img = read_image(os.path.join('../../data/test_images', f))
-        img = F.resize(img, [96, 96]) / 255.
+        img = F.resize(img, [128, 128]) / 255.
         img = torch.tensor(img, dtype=torch.float32).unsqueeze(0)
         x2 = torch.tensor(df.loc[int(f.split('.')[0]), :].values, dtype=torch.float32).unsqueeze(0)
 

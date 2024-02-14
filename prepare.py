@@ -28,20 +28,17 @@ def train_val_data(path):
     df = df.drop(drop_ids, axis=0)
 
     # processed
-    df[df.columns[1:-12]] = (df[df.columns[1:-12]] - df[df.columns[1:-12]].min()) / (
-            df[df.columns[1:-12]].max() - df[df.columns[1:-12]].min())
-
-    df_sin = sin_transformer(np.mean(df[df.columns[1:-12]])).fit_transform(df[df.columns[1:-12]])
-    df_cos = cos_transformer(np.mean(df[df.columns[1:-12]])).fit_transform(df[df.columns[1:-12]])
-
-    df = pd.concat((df[df.columns[0]], df_sin, df_cos, df[df.columns[1:]]), axis=1)
+    df[df.columns[:-12]] = df[df.columns[:-12]].apply(lambda x: (x - np.min(x))/(np.max(x) - np.min(x)), axis=1)
+    df_sq = df[df.columns[:-12]].apply(lambda x: x**2, axis=1)
+    df_sqrt = df[df.columns[:-12]].apply(lambda x: np.sqrt(x), axis=1)
+    df = pd.concat((df_sq, df_sqrt, df), axis=1)
 
     # cleanup
-    train, val = train_test_split(df, test_size=0.2, random_state=SEED)
+    # train, val = train_test_split(df, test_size=0.2, random_state=SEED)
 
     # dump
-    train.to_csv(os.path.join(DUMP, 'train.csv'))
-    val.to_csv(os.path.join(DUMP, 'val.csv'))
+    df.to_csv(os.path.join(DUMP, 'train.csv'))
+    # val.to_csv(os.path.join(DUMP, 'val.csv'))
 
 
 if __name__ == '__main__':

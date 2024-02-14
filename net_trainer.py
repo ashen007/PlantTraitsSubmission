@@ -28,8 +28,8 @@ class Config:
         self.lr = 0.0001
         self.model = model
         self.optimizer = AdamW(self.model.parameters(), lr=self.lr)
-        self.scheduler = ExponentialLR(self.optimizer, gamma=0.01) # only for tuning
-        # self.scheduler = ReduceLROnPlateau(self.optimizer, factor=0.1)
+        # self.scheduler = ExponentialLR(self.optimizer, gamma=0.01) # only for tuning
+        self.scheduler = ReduceLROnPlateau(self.optimizer, factor=0.15, patience=5, cooldown=5)
         self.multi_in = multi_in
         self.loss = loss
         self.epochs = epochs
@@ -50,9 +50,13 @@ def do(config: Config):
     train_dataset, test_dataset = random_split(data_set, (train_size, test_size))
 
     train_dataloader = DataLoader(train_dataset,
-                                  batch_size=config.batch_size, shuffle=True)
+                                  batch_size=config.batch_size,
+                                  shuffle=True,
+                                  drop_last=True)
     test_dataloader = DataLoader(test_dataset,
-                                 batch_size=config.batch_size, shuffle=True)
+                                 batch_size=config.batch_size,
+                                 shuffle=True,
+                                 drop_last=True)
 
     print(f"training steps: {len(train_dataloader)}  "
           f"validation steps: {len(test_dataloader)}")

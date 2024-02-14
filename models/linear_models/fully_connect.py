@@ -9,11 +9,11 @@ class FullyConnected(nn.Module):
 
         layers = []
 
-        for _ in range(3):
+        for _ in range(2):
             layers.append(nn.Sequential(nn.Linear(in_units, out_units),
                                         nn.LeakyReLU(),
                                         nn.BatchNorm1d(out_units),
-                                        nn.Dropout(0.2))
+                                        nn.Dropout(0.1))
                           )
 
             in_units = out_units

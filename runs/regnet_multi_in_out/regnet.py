@@ -1,14 +1,14 @@
 from torch import nn
 from net_trainer import *
-from models.vgg import VGG
+from models.regnet import RegNet
 
 if __name__ == "__main__":
     config = Config('../../data/',
                     '../../data/processed',
-                    VGG(3),
+                    RegNet(3),
                     nn.MSELoss,
-                    25,
-                    32,
+                    30,
+                    16,
                     restore_best=True,
                     multi_out=True)
 

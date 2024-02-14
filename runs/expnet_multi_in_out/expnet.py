@@ -1,13 +1,13 @@
 from torch import nn
 from net_trainer import *
-from models.vgg import VGG
+from models.exp import ExpNet
 
 if __name__ == "__main__":
     config = Config('../../data/',
                     '../../data/processed',
-                    VGG(3),
+                    ExpNet(3),
                     nn.MSELoss,
-                    25,
+                    30,
                     32,
                     restore_best=True,
                     multi_out=True)
