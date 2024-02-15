@@ -1,26 +1,31 @@
 import os
+
+import matplotlib.pyplot as plt
 import numpy as np
 import torch
 import pandas as pd
 import tqdm
+import albumentations as A
+import cv2
+
 from torchvision.io import read_image
-from models.regnet import RegNet
-from torchvision.transforms.v2 import (Compose,
-                                       Normalize,
-                                       ToDtype,
-                                       Resize,
-                                       ColorJitter)
+from models.backbone.effnet import CustomEffNet
+from albumentations.core.composition import Compose, OneOf
+from albumentations.pytorch import ToTensorV2
 from utils.move import move_to
 
 if __name__ == '__main__':
-    TRANSFORMER = Compose([Resize(128),
-                           ToDtype(torch.float32),
-                           Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225]),
+    TRANSFORMER = Compose([A.Resize(300, 300),
+                           A.Normalize(
+                               mean=[0.485, 0.456, 0.406],
+                               std=[0.229, 0.224, 0.225],
+                           ),
+                           ToTensorV2(),
                            ])
 
     # load model
     state = torch.load('./best_model.pth')
-    model = RegNet(3)
+    model = CustomEffNet()
     model.load_state_dict(state['model_state_dict'])
 
     df = pd.read_csv('../../data/test.csv', index_col='id')
@@ -32,9 +37,17 @@ if __name__ == '__main__':
     preds = []
 
     for f in tqdm.tqdm(os.listdir('../../data/test_images')):
-        img = read_image(os.path.join('../../data/test_images', f)) / 255.
-        img = TRANSFORMER(img).unsqueeze(0)
+        img = cv2.imread(os.path.join('../../data/test_images', f))
+        img = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
+        augmented = TRANSFORMER(image=img)
+        img = augmented['image']
+        img = img.unsqueeze(0)
         x2 = torch.tensor(df.loc[int(f.split('.')[0]), :].values, dtype=torch.float32).unsqueeze(0)
+
+        # plt.figure()
+        # plt.imshow(augmented['image'].permute(1, 2, 0))
+        # plt.show()
+        # break
 
         img = move_to(img, 'cuda')
         x2 = move_to(x2, 'cuda')
@@ -44,8 +57,8 @@ if __name__ == '__main__':
             model.eval()
             y1, y2 = model((img, x2))
 
-        logits = torch.abs(y1 + y2)
+        logits = torch.abs(y1 + y2 * np.random.normal())
         preds.append([f.split('.')[0]] + list(logits.cpu().numpy()[0]))
 
     preds = pd.DataFrame(preds, columns=['id', 'X4', 'X11', 'X18', 'X50', 'X26', 'X3112'])
-    preds.to_csv('./submission_0.csv', index=False)
+    preds.to_csv('./submission.csv', index=False)

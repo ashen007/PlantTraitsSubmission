@@ -1,6 +1,6 @@
 from dataclasses import dataclass
 from torch.optim import AdamW
-from torch.optim.lr_scheduler import ReduceLROnPlateau, ExponentialLR
+from torch.optim.lr_scheduler import ReduceLROnPlateau, ExponentialLR, OneCycleLR
 from torch.utils.data import random_split, DataLoader
 from dataloader.plantdata import PlantTraitDataset
 from train.train import Compile
@@ -25,11 +25,18 @@ class Config:
         self.anno = anno
 
         # models
-        self.lr = 0.0001
+        self.lr = 1e-4
         self.model = model
         self.optimizer = AdamW(self.model.parameters(), lr=self.lr)
         # self.scheduler = ExponentialLR(self.optimizer, gamma=0.01) # only for tuning
-        self.scheduler = ReduceLROnPlateau(self.optimizer, factor=0.15, patience=5, cooldown=5)
+        # self.scheduler = ReduceLROnPlateau(self.optimizer, factor=0.15, patience=5, cooldown=5)
+        self.scheduler = OneCycleLR(self.optimizer,
+                                    epochs=epochs,
+                                    steps_per_epoch=2559,
+                                    max_lr=1e-3,
+                                    pct_start=0.2,
+                                    div_factor=1.0e+3,
+                                    final_div_factor=1.0e+3)
         self.multi_in = multi_in
         self.loss = loss
         self.epochs = epochs

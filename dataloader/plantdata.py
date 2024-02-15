@@ -6,28 +6,42 @@ import os.path
 import pandas as pd
 import torch
 import matplotlib.pyplot as plt
+import albumentations as A
+import cv2
 
-from torchvision import io
-from torchvision.transforms.v2 import (Compose,
-                                       CenterCrop,
-                                       RandomCrop,
-                                       RandomHorizontalFlip,
-                                       ColorJitter,
-                                       Normalize,
-                                       RandomErasing,
-                                       ToDtype
-                                       )
+from albumentations.core.composition import Compose, OneOf
+from albumentations.pytorch import ToTensorV2
 from torch.utils.data import Dataset, DataLoader
 
 
 class PlantTraitDataset(Dataset):
-    TRANSFORMER = Compose([RandomCrop(320),
-                           ColorJitter(brightness=.5, hue=.3, contrast=.5, saturation=.3),
-                           RandomHorizontalFlip(),
-                           ToDtype(torch.float32),
-                           Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225]),
-                           RandomErasing()
-                           ])
+    TRANSFORMER = Compose([
+        A.RandomResizedCrop(height=380, width=380),
+        A.Flip(p=0.5),
+        A.RandomRotate90(p=0.5),
+        A.ShiftScaleRotate(p=0.5),
+        A.HueSaturationValue(p=0.5),
+        A.OneOf([
+            A.RandomBrightnessContrast(p=0.5),
+            A.RandomGamma(p=0.5),
+        ], p=0.5),
+        A.OneOf([
+            A.Blur(p=0.1),
+            A.GaussianBlur(p=0.1),
+            A.MotionBlur(p=0.1),
+        ], p=0.1),
+        A.OneOf([
+            A.GaussNoise(p=0.1),
+            A.ISONoise(p=0.1),
+            A.GridDropout(ratio=0.5, p=0.2),
+            A.CoarseDropout(max_holes=16, min_holes=8, max_height=16, max_width=16, min_height=8, min_width=8, p=0.2)
+        ], p=0.2),
+        A.Normalize(
+            mean=[0.485, 0.456, 0.406],
+            std=[0.229, 0.224, 0.225],
+        ),
+        ToTensorV2(),
+    ])
 
     def __init__(self, path, anno):
         self.dir = os.path.join(path, 'train_images')
@@ -48,18 +62,20 @@ class PlantTraitDataset(Dataset):
         ys_2 = self.df.loc[idx, columns[-6:]].values
         ys_2 = torch.tensor(ys_2, dtype=torch.float32)
 
-        img = torch.tensor(io.read_image(f'{self.dir}/{img_id}.jpeg'), dtype=torch.float32)/255.0
-        img = self.TRANSFORMER(img)
+        img = cv2.imread(f'{self.dir}/{img_id}.jpeg')
+        img = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
+        augmented = self.TRANSFORMER(image=img)
+        img = augmented['image']
 
         return (img, xs), (ys_1, ys_2)
 
 
 if __name__ == '__main__':
     dataset = PlantTraitDataset('../data', '../data/processed')
-    loader = DataLoader(dataset, 1, True)
+    loader = DataLoader(dataset, 16, True)
 
     xs, ys = next(iter(loader))
-
+    print(len(loader))
     print(xs[0].shape)
     print(xs[1].shape)
     print(ys[0].shape)
