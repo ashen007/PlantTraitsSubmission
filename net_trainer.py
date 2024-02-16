@@ -32,7 +32,7 @@ class Config:
         # self.scheduler = ReduceLROnPlateau(self.optimizer, factor=0.15, patience=5, cooldown=5)
         self.scheduler = OneCycleLR(self.optimizer,
                                     epochs=epochs,
-                                    steps_per_epoch=2559,
+                                    steps_per_epoch=1386,
                                     max_lr=1e-3,
                                     pct_start=0.2,
                                     div_factor=1.0e+3,

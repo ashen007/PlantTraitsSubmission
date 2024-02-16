@@ -19,7 +19,7 @@ def cos_transformer(period):
 
 
 def train_val_data(path):
-    df = pd.read_csv(os.path.join(path, 'cleaned_train.csv'))
+    df = pd.read_csv(os.path.join(path, 'train_data_cleansed.csv'))
     df = df.fillna(0)
     drop_files = set([f'{i}.jpeg' for i in (df['id']).values.tolist()]).difference(
         set(os.listdir('data/train_images')))
@@ -29,9 +29,10 @@ def train_val_data(path):
 
     # processed
     df[df.columns[:-12]] = df[df.columns[:-12]].apply(lambda x: (x - np.min(x))/(np.max(x) - np.min(x)), axis=1)
-    df_sq = df[df.columns[:-12]].apply(lambda x: x**2, axis=1)
-    df_sqrt = df[df.columns[:-12]].apply(lambda x: np.sqrt(x), axis=1)
-    df = pd.concat((df_sq, df_sqrt, df), axis=1)
+    # df_sq = df[df.columns[:-12]].apply(lambda x: x**2, axis=1)
+    # df_sqrt = df[df.columns[:-12]].apply(lambda x: np.sqrt(x), axis=1)
+    # df = pd.concat((df_sq, df_sqrt, df), axis=1)
+    # df = df.dropna()
 
     # cleanup
     # train, val = train_test_split(df, test_size=0.2, random_state=SEED)

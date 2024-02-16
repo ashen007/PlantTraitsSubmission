@@ -16,7 +16,7 @@ from torch.utils.data import Dataset, DataLoader
 
 class PlantTraitDataset(Dataset):
     TRANSFORMER = Compose([
-        A.RandomResizedCrop(height=380, width=380),
+        A.RandomResizedCrop(height=128, width=128),
         A.Flip(p=0.5),
         A.RandomRotate90(p=0.5),
         A.ShiftScaleRotate(p=0.5),
@@ -57,31 +57,35 @@ class PlantTraitDataset(Dataset):
         xs = self.df.loc[idx, columns[1: -12]].values
         xs = torch.tensor(xs, dtype=torch.float32)
 
-        ys_1 = self.df.loc[idx, columns[-12:-6]].values
-        ys_1 = torch.tensor(ys_1, dtype=torch.float32)
-        ys_2 = self.df.loc[idx, columns[-6:]].values
-        ys_2 = torch.tensor(ys_2, dtype=torch.float32)
+        y_mu = torch.tensor(self.df.loc[idx, columns[-12:-6]].values, dtype=torch.float32)
+        y_sigma = torch.tensor(self.df.loc[idx, columns[-6:]].values, dtype=torch.float32)
+        z_score = torch.normal(0, 1, y_mu.shape)
+
+        # print(y_mu)
+        # print(y_sigma)
+        # print(z_score)
+
+        y = y_mu + z_score * y_sigma
 
         img = cv2.imread(f'{self.dir}/{img_id}.jpeg')
         img = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
         augmented = self.TRANSFORMER(image=img)
         img = augmented['image']
 
-        return (img, xs), (ys_1, ys_2)
+        return (img, xs), y
 
 
 if __name__ == '__main__':
     dataset = PlantTraitDataset('../data', '../data/processed')
-    loader = DataLoader(dataset, 16, True)
+    loader = DataLoader(dataset, 1, True)
 
     xs, ys = next(iter(loader))
     print(len(loader))
     print(xs[0].shape)
     print(xs[1].shape)
-    print(ys[0].shape)
-    print(ys[1].shape)
 
-    print(xs[0][0])
+    print(ys)
+    print(ys.shape)
 
     plt.figure()
     plt.imshow(xs[0][0].permute(1, 2, 0).numpy())

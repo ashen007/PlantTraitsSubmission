@@ -48,7 +48,7 @@ def get_scores(*, model, optimizer, epoch,
 def do_training(*, model, optimizer, inputs, labels, loss_func, multi_out=False):
     if multi_out:
         y_hat_m, y_hat_a = model(inputs)
-        loss = torch.sqrt(loss_func(y_hat_m, labels[0])) + torch.sqrt(loss_func(y_hat_a, labels[1]))
+        loss = loss_func(y_hat_m, labels[0]) + loss_func(y_hat_a, labels[1])
         y_hat = torch.concat((y_hat_m, y_hat_a), dim=1)
 
     else:
