@@ -1,3 +1,4 @@
+import json
 import os
 
 import matplotlib.pyplot as plt
@@ -14,6 +15,11 @@ from albumentations.core.composition import Compose, OneOf
 from albumentations.pytorch import ToTensorV2
 from utils.move import move_to
 
+
+def denorm(x, name):
+    return x * normalize[name]['std'] + normalize[name]['mean']
+
+
 if __name__ == '__main__':
     TRANSFORMER = Compose([A.Resize(128, 128),
                            A.Normalize(
@@ -22,6 +28,9 @@ if __name__ == '__main__':
                            ),
                            ToTensorV2(),
                            ])
+
+    with open('../../../data/normalize.json', 'r') as file:
+        normalize = json.load(file)
 
     # load model
     state = torch.load('./best_model.pth')
@@ -57,8 +66,15 @@ if __name__ == '__main__':
             model.eval()
             y = model((img, x2))
 
-        logits = torch.exp(y)
-        preds.append([f.split('.')[0]] + list(logits.cpu().numpy()[0]))
+        logits = y
+        preds.append([f.split('.')[0]] + list(logits.cpu().numpy()[0][:6]))
 
-    preds = pd.DataFrame(preds, columns=['id', 'X4', 'X11', 'X18', 'X50', 'X26', 'X3112'])
-    preds.to_csv('./submission.csv', index=False)
+    preds = pd.DataFrame(preds, columns=['id', 'X4', 'X11', 'X18', 'X50', 'X26', 'X3112']).set_index('id')
+
+    # restore to original scale
+    for c in preds.columns:
+        preds[c] = preds[c].apply(lambda x: denorm(x, f'{c}_mean'))
+
+    preds = np.exp(preds)
+
+    preds.to_csv('./submission_1.csv', index=True)

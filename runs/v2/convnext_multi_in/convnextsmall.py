@@ -7,8 +7,8 @@ if __name__ == "__main__":
                     '../../../data/processed',
                     CustomConvNextSmall(),
                     nn.SmoothL1Loss,
-                    30,
-                    32,
+                    20,
+                    16,
                     restore_best=True,
                     multi_out=False)
 

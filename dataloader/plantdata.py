@@ -16,7 +16,7 @@ from torch.utils.data import Dataset, DataLoader
 
 class PlantTraitDataset(Dataset):
     TRANSFORMER = Compose([
-        A.RandomResizedCrop(height=128, width=128),
+        A.RandomResizedCrop(height=256, width=256),
         A.Flip(p=0.5),
         A.RandomRotate90(p=0.5),
         A.ShiftScaleRotate(p=0.5),
@@ -57,15 +57,7 @@ class PlantTraitDataset(Dataset):
         xs = self.df.loc[idx, columns[1: -12]].values
         xs = torch.tensor(xs, dtype=torch.float32)
 
-        y_mu = torch.tensor(self.df.loc[idx, columns[-12:-6]].values, dtype=torch.float32)
-        y_sigma = torch.tensor(self.df.loc[idx, columns[-6:]].values, dtype=torch.float32)
-        z_score = torch.normal(0, 1, y_mu.shape)
-
-        # print(y_mu)
-        # print(y_sigma)
-        # print(z_score)
-
-        y = y_mu + z_score * y_sigma
+        y = torch.tensor(self.df.loc[idx, columns[-12:]].values, dtype=torch.float32)
 
         img = cv2.imread(f'{self.dir}/{img_id}.jpeg')
         img = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)

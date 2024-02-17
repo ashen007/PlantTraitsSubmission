@@ -21,7 +21,7 @@ class CustomConvNextSmall(nn.Module):
         self.classifier = nn.Sequential(nn.Linear(in_features + 256, in_features),
                                         nn.ReLU(inplace=True),
                                         nn.Dropout(0.5),
-                                        nn.Linear(in_features, 6)
+                                        nn.Linear(in_features, 12)
                                         )
 
     def forward(self, x):
