@@ -54,10 +54,10 @@ class PlantTraitDataset(Dataset):
         columns = self.df.columns
 
         img_id = self.df.loc[idx, 'id']
-        xs = self.df.loc[idx, columns[1: -12]].values
+        xs = self.df.loc[idx, columns[1: -6]].values
         xs = torch.tensor(xs, dtype=torch.float32)
 
-        y = torch.tensor(self.df.loc[idx, columns[-12:]].values, dtype=torch.float32)
+        y = torch.tensor(self.df.loc[idx, columns[-6:]].values, dtype=torch.float32)
 
         img = cv2.imread(f'{self.dir}/{img_id}.jpeg')
         img = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)

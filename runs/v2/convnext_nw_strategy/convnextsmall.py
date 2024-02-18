@@ -8,7 +8,7 @@ if __name__ == "__main__":
                     CustomConvNextSmall(),
                     nn.SmoothL1Loss,
                     20,
-                    16,
+                    32,
                     restore_best=True,
                     multi_out=False)
 

@@ -25,15 +25,15 @@ class Config:
         self.anno = anno
 
         # models
-        self.lr = 1e-4
+        self.lr = 1e-3
         self.model = model
         self.optimizer = AdamW(self.model.parameters(), lr=self.lr)
         # self.scheduler = ExponentialLR(self.optimizer, gamma=0.01) # only for tuning
         # self.scheduler = ReduceLROnPlateau(self.optimizer, factor=0.15, patience=5, cooldown=5)
         self.scheduler = OneCycleLR(self.optimizer,
                                     epochs=epochs,
-                                    steps_per_epoch=1386,
-                                    max_lr=1e-3,
+                                    steps_per_epoch=5545,
+                                    max_lr=1e-2,
                                     pct_start=0.2,
                                     div_factor=1.0e+3,
                                     final_div_factor=1.0e+3)

@@ -1,4 +1,3 @@
-import json
 import os
 
 import numpy as np
@@ -8,18 +7,13 @@ import tqdm
 import albumentations as A
 import cv2
 
-from models.approch_1.backbone.v2 import CustomConvNextSmall
+from models.approch_1.backbone.effnet import CustomEffNet
 from albumentations.core.composition import Compose
 from albumentations.pytorch import ToTensorV2
 from utils.move import move_to
 
-
-def denorm(x, name):
-    return x * normalize[name]['std'] + normalize[name]['mean']
-
-
 if __name__ == '__main__':
-    TRANSFORMER = Compose([A.Resize(128, 128),
+    TRANSFORMER = Compose([A.Resize(300, 300),
                            A.Normalize(
                                mean=[0.485, 0.456, 0.406],
                                std=[0.229, 0.224, 0.225],
@@ -27,19 +21,16 @@ if __name__ == '__main__':
                            ToTensorV2(),
                            ])
 
-    with open('../../../data/normalize.json', 'r') as file:
-        normalize = json.load(file)
-
     # load model
-    state = torch.load('./best_model.pth')
-    model = CustomConvNextSmall()
+    state = torch.load('best_model.pth')
+    model = CustomEffNet()
     model.load_state_dict(state['model_state_dict'])
 
     df = pd.read_csv('../../../data/test.csv', index_col='id')
     df = df.apply(lambda x: (x - np.min(x)) / (np.max(x) - np.min(x)), axis=1)
-    # df_sq = df.apply(lambda x: x ** 2, axis=1)
-    # df_sqrt = df.apply(lambda x: np.sqrt(x), axis=1)
-    # df = pd.concat((df_sq, df_sqrt, df), axis=1)
+    df_sq = df.apply(lambda x: x ** 2, axis=1)
+    df_sqrt = df.apply(lambda x: np.sqrt(x), axis=1)
+    df = pd.concat((df_sq, df_sqrt, df), axis=1)
 
     preds = []
 
@@ -62,17 +53,10 @@ if __name__ == '__main__':
 
         with torch.no_grad():
             model.eval()
-            y = model((img, x2))
+            y1, y2 = model((img, x2))
 
-        logits = y
-        preds.append([f.split('.')[0]] + list(logits.cpu().numpy()[0][:6]))
+        logits = torch.abs(y1 + y2 * np.random.normal())
+        preds.append([f.split('.')[0]] + list(logits.cpu().numpy()[0]))
 
-    preds = pd.DataFrame(preds, columns=['id', 'X4', 'X11', 'X18', 'X50', 'X26', 'X3112']).set_index('id')
-
-    # restore to original scale
-    for c in preds.columns:
-        preds[c] = preds[c].apply(lambda x: denorm(x, f'{c}_mean'))
-
-    preds = np.exp(preds)
-
-    preds.to_csv('./submission_1.csv', index=True)
+    preds = pd.DataFrame(preds, columns=['id', 'X4', 'X11', 'X18', 'X50', 'X26', 'X3112'])
+    preds.to_csv('./submission.csv', index=False)
