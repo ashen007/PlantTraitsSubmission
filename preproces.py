@@ -4,8 +4,8 @@ import numpy as np
 import pandas as pd
 import tqdm
 
-from feature_engine.transformation import LogCpTransformer
-from sklearn.preprocessing import MinMaxScaler
+from feature_engine.transformation import LogTransformer
+from sklearn.preprocessing import StandardScaler
 from sklearn.pipeline import Pipeline
 
 ROOT = 'data/'
@@ -14,32 +14,32 @@ SEED = 48
 
 
 def pre_process(path):
-    df = pd.read_csv(os.path.join(path, 'train_clean.csv'))
-    df = df.fillna(0)
+    df = pd.read_csv(os.path.join(path, 'train.csv'), usecols=['id', 'X4_mean', 'X11_mean', 'X18_mean',
+                                                               'X26_mean', 'X50_mean', 'X3112_mean'])
+    df = np.abs(df)
 
     drop_files = set([f'{i}.jpeg' for i in (df['id']).values.tolist()]).difference(
         set(os.listdir('./data/train_images')))
 
     drop_ids = [int(i.split('.')[0]) for i in drop_files]
     df = df.set_index('id')
-    features = df.columns[:-12]
-    targets = df.columns[-12:-6]
-    df = df.drop(drop_ids, axis=0).drop(df.columns[-6:], axis=1)
+    df = df.drop(drop_ids, axis=0)  # .drop(df.columns[-6:], axis=1)
 
     # pre process
-    pipe_target = Pipeline([('log_trans', LogCpTransformer(base='10', C=1e-5)),
-                            ('min_max_scale', MinMaxScaler())])
-    df.loc[:, targets] = pipe_target.fit_transform(np.asarray(df.loc[:, targets]))
-    df = df.loc[:, targets]
+    pipe_target = Pipeline([('log_trans', LogTransformer(base='10')),
+                            ('min_max_scale', StandardScaler())
+                            ])
+    df[df.columns] = pipe_target.fit_transform(np.asarray(df))
 
-    # pipe_feat = Pipeline([('log_trans', LogCpTransformer(base='10', C=1e-5)),
-    #                       ('min_max_scale', MinMaxScaler())])
-    # df.loc[:, features] = pipe_feat.fit_transform(np.asarray(df.loc[:, features]))
+    preds = pd.read_csv('archive/runs/v3/increase_input/submission_1.csv', index_col='id')
+    preds = pd.DataFrame(pipe_target.inverse_transform(np.asarray(preds))).set_index(preds.index)
 
     # dump
-    df.to_csv(os.path.join(DUMP, 'train.csv'))
-    joblib.dump(pipe_target, './data/target_pipe.joblib')
+    # df.to_csv(os.path.join(DUMP, 'train.csv'))
+    preds.to_csv('runs/v3/increase_input/submission.csv')
+    # joblib.dump(pipe_target, './data/target_pipe.joblib')
 
 
 if __name__ == '__main__':
-    pre_process(ROOT)
+    print()
+    # pre_process(ROOT)
