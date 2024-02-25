@@ -1,14 +1,16 @@
 import timm
+import torch
 from torch import nn
 from dataloader.plantdata import PlantTraitDataset
 from torch.utils.data import DataLoader
+from loss import R2Loss, AltR2Loss
 
 
 class CustomEffnet(nn.Module):
     def __init__(self):
         super(CustomEffnet, self).__init__()
 
-        self.model = timm.create_model('efficientvit_b1.r256_in1k',
+        self.model = timm.create_model('efficientvit_b1.r288_in1k',
                                        pretrained=True,
                                        num_classes=6)
 
@@ -19,17 +21,17 @@ class CustomEffnet(nn.Module):
 
 
 if __name__ == '__main__':
-    dataset = PlantTraitDataset('../data', '../data/processed')
-    x, y = next(iter(DataLoader(dataset, 16, True)))
+    dataset = PlantTraitDataset('../data')
+    x, y = next(iter(DataLoader(dataset, 32, True)))
 
     print(x.shape, y.shape)
 
     m = CustomEffnet()
     main = m(x)
 
-    loss = nn.SmoothL1Loss()
-    loss_score = loss(main, y)
+    loss = nn.MSELoss()
 
-    print(main)
+    loss_score = torch.sqrt(loss(main.cuda(), y.cuda()))
+
     print(main.shape)
     print(loss_score)

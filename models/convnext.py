@@ -4,11 +4,11 @@ from dataloader.plantdata import PlantTraitDataset
 from torch.utils.data import DataLoader
 
 
-class CustomEffnetLarge(nn.Module):
+class CustomConvNext(nn.Module):
     def __init__(self):
-        super(CustomEffnetLarge, self).__init__()
+        super(CustomConvNext, self).__init__()
 
-        self.model = timm.create_model('efficientvit_b1.r288_in1k',
+        self.model = timm.create_model('timm/convnext_small.fb_in22k',
                                        pretrained=True,
                                        num_classes=6)
 
@@ -19,17 +19,18 @@ class CustomEffnetLarge(nn.Module):
 
 
 if __name__ == '__main__':
-    dataset = PlantTraitDataset('../../../data', '../../data/processed')
-    x, y = next(iter(DataLoader(dataset, 16, True)))
+    dataset = PlantTraitDataset('../data')
+    x, y = next(iter(DataLoader(dataset, 32, True)))
 
     print(x.shape, y.shape)
 
-    m = CustomEffnetLarge()
+    m = CustomConvNext()
     main = m(x)
 
-    loss = nn.SmoothL1Loss()
+    loss = nn.MSELoss()
     loss_score = loss(main, y)
 
     print(main)
     print(main.shape)
     print(loss_score)
+

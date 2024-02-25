@@ -2,6 +2,7 @@ import torch
 from torch import nn
 from torchmetrics.regression import R2Score, MeanAbsoluteError
 from train import Compile
+from loss import AltR2Loss
 from models.effnet import CustomEffnet
 from make_dataloaders import get_train_dataloader, get_val_dataloader
 
@@ -11,9 +12,9 @@ val_dataloader = get_val_dataloader(32)
 complied = Compile(CustomEffnet(),
                    nn.MSELoss,
                    torch.optim.AdamW,
-                   1e-4,
+                   3e-4,
                    1e-2,
-                   10,
+                   15,
                    32,
                    train_dataloader,
                    val_dataloader,

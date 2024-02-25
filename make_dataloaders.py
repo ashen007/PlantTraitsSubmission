@@ -1,8 +1,7 @@
 from torch.utils.data import DataLoader, random_split
 from dataloader.plantdata import PlantTraitDataset
 
-DATASET = PlantTraitDataset('../../data/',
-                            '../../data/processed')
+DATASET = PlantTraitDataset('../../data/')
 
 # dataloaders
 train_size = int(len(DATASET) * 0.8)
