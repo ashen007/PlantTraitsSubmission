@@ -1,5 +1,4 @@
 import os
-
 import torch
 import pandas as pd
 import tqdm
@@ -7,7 +6,7 @@ import albumentations as A
 import cv2
 import joblib
 
-from models.effnet import CustomEffnet
+from models.effnet_mm import CustomEffnet
 from dataloader.testdata import TestDataset
 
 if __name__ == '__main__':
@@ -21,7 +20,9 @@ if __name__ == '__main__':
 
     df = pd.read_pickle('../../data/test.pkl')
     pipe = joblib.load('../../data/processed/scaler.joblib')
-    test_dataset = TestDataset(df['jpeg_bytes'].values, df, df['id'].values)
+    test_dataset = TestDataset(df['jpeg_bytes'].values,
+                               df,
+                               df['id'].values)
     preds = []
 
     model.eval()
@@ -47,4 +48,4 @@ if __name__ == '__main__':
     preds = pd.DataFrame(preds)
 
     # restore to original scale
-    preds.to_csv('./submission_2.csv', index=False)
+    preds.to_csv('./submission1.csv', index=False)

@@ -13,11 +13,18 @@ class CustomEffnet(nn.Module):
         self.model = timm.create_model('efficientvit_b1.r288_in1k',
                                        pretrained=True,
                                        num_classes=6)
+        self.fc1 = nn.Sequential(nn.Linear(163, 6),
+                                 nn.BatchNorm1d(6),
+                                 nn.LeakyReLU())
+
+        self.out = nn.Linear(12, 6)
 
     def forward(self, x):
-        x_ = self.model(x[0])
+        x_img = self.model(x[0])
+        x_fc1 = self.fc1(x[1])
+        x = self.out(torch.cat((x_img, x_fc1), dim=1))
 
-        return x_
+        return x
 
 
 if __name__ == '__main__':

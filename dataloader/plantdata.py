@@ -17,12 +17,15 @@ class PlantTraitDataset(Dataset):
         self.columns = ['X4_mean', 'X11_mean', 'X18_mean', 'X50_mean', 'X26_mean', 'X3112_mean']
         self.dir = os.path.join(path, 'train_images')
         self.df = pd.read_csv(os.path.join(path, 'processed/train.csv'))
+        self.xs = pd.read_csv(os.path.join(path, 'processed/train_x.csv')).drop('id', axis=1)
+        self.xs_cols = self.xs.columns
 
     def __len__(self):
         return len(self.df)
 
     def __getitem__(self, idx):
         img_id = self.df.loc[idx, 'id']
+        x = self.xs.loc[idx, :]
         y = torch.tensor(self.df.loc[idx, self.columns].values, dtype=torch.float32)
 
         img = cv2.imread(f'{self.dir}/{img_id}.jpeg')
@@ -30,20 +33,25 @@ class PlantTraitDataset(Dataset):
         augmented = TRANSFORMER(image=img)
         img = augmented['image']
 
-        return img, y
+        return ((img,
+                 torch.tensor(x.values, dtype=torch.float32)),
+                y)
 
 
 if __name__ == '__main__':
     dataset = PlantTraitDataset('../data')
-    loader = DataLoader(dataset, 32, True)
+    loader = DataLoader(dataset, 1, True)
 
-    x, y = next(iter(loader))
+    (x1, x2), y = next(iter(loader))
     print(len(loader))
-    print(x.shape)
+    print(x1.shape)
+    print(x2.shape)
+
+    print(x2)
 
     print(y)
     print(y.shape)
 
     plt.figure()
-    plt.imshow(x[0].permute(1, 2, 0).numpy())
+    plt.imshow(x1[0].permute(1, 2, 0).numpy())
     plt.show()

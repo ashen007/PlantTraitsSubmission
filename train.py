@@ -2,6 +2,7 @@ import numpy as np
 import torch
 import tqdm
 from torch import nn
+from move import move_to
 
 
 class AvgMeter(object):
@@ -68,8 +69,8 @@ class Compile(object):
             self.model.train()
 
             for X, Y in tqdm.tqdm(self.train_loader, desc='steps '):
-                X = X.to('cuda')
-                Y = Y.to('cuda')
+                X = move_to(X, 'cuda')
+                Y = move_to(Y, 'cuda')
 
                 y_pred = self.model(X)
                 loss = torch.sqrt(self.loss(y_pred, Y))
@@ -99,8 +100,8 @@ class Compile(object):
                 self.model.eval()
 
                 for X, Y in tqdm.tqdm(self.val_loader, desc='steps '):
-                    X = X.to('cuda')
-                    Y = Y.to('cuda')
+                    X = move_to(X, 'cuda')
+                    Y = move_to(Y, 'cuda')
 
                     with torch.no_grad():
                         y_pred = self.model(X)
