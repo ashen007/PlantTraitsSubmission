@@ -7,7 +7,7 @@ import albumentations as A
 import cv2
 import joblib
 
-from models.convnext import CustomConvNext
+from models.effnet import CustomEffnet
 from dataloader.testdata import TestDataset
 
 if __name__ == '__main__':
@@ -16,7 +16,7 @@ if __name__ == '__main__':
 
     # load model
     state = torch.load('best_checkpoint.pth')
-    model = CustomConvNext()
+    model = CustomEffnet()
     model.load_state_dict(state['model_state_dict'])
 
     df = pd.read_pickle('../../data/test.pkl')
@@ -47,4 +47,4 @@ if __name__ == '__main__':
     preds = pd.DataFrame(preds)
 
     # restore to original scale
-    preds.to_csv('./submission_1.csv', index=False)
+    preds.to_csv('./submission_2.csv', index=False)

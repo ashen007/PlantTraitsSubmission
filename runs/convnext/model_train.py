@@ -8,12 +8,17 @@ from make_dataloaders import get_train_dataloader, get_val_dataloader
 train_dataloader = get_train_dataloader(32)
 val_dataloader = get_val_dataloader(32)
 
-complied = Compile(CustomConvNext(),
-                   nn.MSELoss,
+# load model
+model = CustomConvNext()
+state = torch.load('./last_checkpoint.pth')
+model.load_state_dict(state['model_state_dict'])
+
+complied = Compile(model,
+                   nn.SmoothL1Loss,
                    torch.optim.AdamW,
-                   3e-4,
+                   1e-4,
                    1e-2,
-                   4,
+                   5,
                    32,
                    train_dataloader,
                    val_dataloader,

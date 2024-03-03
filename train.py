@@ -40,17 +40,17 @@ class Compile(object):
         self.optimizer = optimizer(params=model.parameters(),
                                    lr=init_lr,
                                    weight_decay=weight_decay)
-        # self.lr_scheduler = torch.optim.lr_scheduler.OneCycleLR(self.optimizer,
-        #                                                         init_lr * 10,
-        #                                                         steps_per_epoch=len(train_loader),
-        #                                                         epochs=epochs,
-        #                                                         pct_start=0.1,
-        #                                                         anneal_strategy='cos',
-        #                                                         div_factor=1e3,
-        #                                                         final_div_factor=1e4)
-        self.lr_scheduler = torch.optim.lr_scheduler.CosineAnnealingLR(self.optimizer,
-                                                                       len(train_loader),
-                                                                       0)
+        self.lr_scheduler = torch.optim.lr_scheduler.OneCycleLR(self.optimizer,
+                                                                init_lr * 10,
+                                                                steps_per_epoch=len(train_loader),
+                                                                epochs=epochs,
+                                                                pct_start=0.1,
+                                                                anneal_strategy='cos',
+                                                                div_factor=1e3,
+                                                                final_div_factor=1e4)
+        # self.lr_scheduler = torch.optim.lr_scheduler.CosineAnnealingLR(self.optimizer,
+        #                                                                len(train_loader),
+        #                                                                0)
         self.metrics = metrics
         self.train_loader = train_loader
         self.val_loader = val_loader
@@ -73,7 +73,7 @@ class Compile(object):
                 Y = move_to(Y, 'cuda')
 
                 y_pred = self.model(X)
-                loss = torch.sqrt(self.loss(y_pred, Y))
+                loss = self.loss(y_pred, Y)
                 self.track_loss.update(loss)
 
                 if self.model.training:

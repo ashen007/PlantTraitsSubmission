@@ -8,15 +8,15 @@ import torch
 import matplotlib.pyplot as plt
 import cv2
 from torch.utils.data import Dataset, DataLoader
-from dataloader.transformers import TRANSFORMER
+from dataloader.transformers import TEST_TRANSFORMER
 
 
-class PlantTraitDataset(Dataset):
+class PlantTraitValidDataset(Dataset):
 
     def __init__(self, path, transform=True):
         self.columns = ['X4_mean', 'X11_mean', 'X18_mean', 'X50_mean', 'X26_mean', 'X3112_mean']
         self.dir = os.path.join(path, 'train_images')
-        self.df = pd.read_csv(os.path.join(path, 'processed/train.csv'))
+        self.df = pd.read_csv(os.path.join(path, 'processed/valid.csv'))
         self.xs = pd.read_csv(os.path.join(path, 'processed/train_x.csv')).drop('id', axis=1)
         self.xs_cols = self.xs.columns
         self.transform = transform
@@ -33,7 +33,7 @@ class PlantTraitDataset(Dataset):
         img = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
 
         if self.transform:
-            augmented = TRANSFORMER(image=img)
+            augmented = TEST_TRANSFORMER(image=img)
             img = augmented['image']
 
         return ((img,
@@ -42,7 +42,7 @@ class PlantTraitDataset(Dataset):
 
 
 if __name__ == '__main__':
-    dataset = PlantTraitDataset('../data')
+    dataset = PlantTraitValidDataset('../data')
     loader = DataLoader(dataset, 1, True)
 
     (x1, x2), y = next(iter(loader))
