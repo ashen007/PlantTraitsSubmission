@@ -4,6 +4,7 @@ from albumentations.pytorch import ToTensorV2
 
 TRANSFORMER = Compose([
     A.RandomSizedCrop((int(.75 * 512), 512), 288, 288, 1.0, p=1.0),
+    # A.Resize(512, 512),
     A.HorizontalFlip(p=0.5),
     A.RandomBrightnessContrast(0.1, 0.2, p=1.0),
     A.ShiftScaleRotate(p=0.5),

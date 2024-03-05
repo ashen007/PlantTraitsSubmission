@@ -31,7 +31,7 @@ class MultiAtrous(nn.Module):
 class DolgLocalBranch(nn.Module):
     def __init__(self, in_channel, out_channel, hidden_channel=2048):
         super().__init__()
-        self.multi_atrous = MultiAtrous(in_channel, hidden_channel, size=int(288 / 16))
+        self.multi_atrous = MultiAtrous(in_channel, hidden_channel, size=int(128 / 7))
         self.conv1x1_1 = nn.Conv2d(hidden_channel, out_channel, kernel_size=1)
         self.conv1x1_2 = nn.Conv2d(
             out_channel, out_channel, kernel_size=1, bias=False)

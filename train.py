@@ -86,9 +86,9 @@ class Compile(object):
 
                 self.lr_scheduler.step()
 
-            dtl = [f'{key}: {val.compute().item():.4f}' for key, val in self.metrics.items()]
+            dtl = [f'{key}: {val.compute().item():.7f}' for key, val in self.metrics.items()]
             print(f"epoch: {epoch + 1}, "
-                  f"training loss: {self.track_loss.avg:.4f}, ",
+                  f"training loss: {self.track_loss.avg:.7f}, ",
                   " ".join(dtl))
 
             if self.val_loader is not None:
@@ -111,9 +111,9 @@ class Compile(object):
                     for key, val in self.metrics.items():
                         val.update(y_pred, Y)
 
-                dtl = [f'{key}: {val.compute().item():.4f}' for key, val in self.metrics.items()]
+                dtl = [f'{key}: {val.compute().item():.7f}' for key, val in self.metrics.items()]
                 print(f"epoch: {epoch + 1}, "
-                      f"validation loss: {self.track_loss.avg:.4f}",
+                      f"validation loss: {self.track_loss.avg:.7f}",
                       " ".join(dtl))
 
             torch.save({'model_state_dict': self.model.state_dict(),

@@ -6,8 +6,8 @@ from loss import AltR2Loss
 from models.effnet import CustomEffnet
 from make_dataloaders import get_train_dataloader, get_val_dataloader
 
-train_dataloader = get_train_dataloader(20)
-val_dataloader = get_val_dataloader(20)
+train_dataloader = get_train_dataloader(24)
+val_dataloader = get_val_dataloader(24)
 
 # load model
 model = CustomEffnet()
@@ -15,11 +15,11 @@ model = CustomEffnet()
 # model.load_state_dict(state['model_state_dict'])
 
 complied = Compile(model,
-                   nn.SmoothL1Loss,
+                   nn.MSELoss,
                    torch.optim.AdamW,
-                   1e-4,
-                   1e-2,
-                   15,
+                   1.5e-5,
+                   0.00005,
+                   30,
                    24,
                    train_dataloader,
                    val_dataloader,
