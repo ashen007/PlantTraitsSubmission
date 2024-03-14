@@ -3,7 +3,7 @@ from albumentations.core.composition import Compose, OneOf
 from albumentations.pytorch import ToTensorV2
 
 TRANSFORMER = Compose([
-    A.RandomSizedCrop((int(.75 * 512), 512), 288, 288, 1.0, p=1.0),
+    A.RandomResizedCrop(128, 128, p=1.0),
     # A.Resize(512, 512),
     A.HorizontalFlip(p=0.5),
     A.RandomBrightnessContrast(0.1, 0.2, p=1.0),
@@ -29,7 +29,7 @@ TRANSFORMER = Compose([
     ToTensorV2(),
 ])
 
-TEST_TRANSFORMER = Compose([A.Resize(288, 288),
+TEST_TRANSFORMER = Compose([A.Resize(128, 128),
                             A.ToFloat(),
                             A.Normalize(
                                 mean=[0.485, 0.456, 0.406],

@@ -10,10 +10,10 @@ class CustomEffnet(nn.Module):
     def __init__(self):
         super(CustomEffnet, self).__init__()
 
-        self.model = timm.create_model('efficientvit_b3.r288_in1k',
+        self.model = timm.create_model('efficientvit_b2.r288_in1k',
                                        pretrained=True,
                                        num_classes=0)
-        self.reg = nn.Sequential(nn.Linear(512, 1024),
+        self.reg = nn.Sequential(nn.Linear(384, 1024),
                                  nn.LayerNorm(1024),
                                  nn.ReLU(),
                                  nn.Dropout(0.5),

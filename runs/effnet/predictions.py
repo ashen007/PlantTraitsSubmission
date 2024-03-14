@@ -15,7 +15,7 @@ if __name__ == '__main__':
     log_features = ['X11_mean', 'X18_mean', 'X50_mean', 'X26_mean', 'X3112_mean']
 
     # load model
-    state = torch.load('step_1/best_checkpoint.pth')
+    state = torch.load('best_checkpoint.pth')
     model = CustomEffnet()
     model.load_state_dict(state['model_state_dict'])
 
@@ -47,4 +47,4 @@ if __name__ == '__main__':
     preds = pd.DataFrame(preds)
 
     # restore to original scale
-    preds.to_csv('./submission_2.csv', index=False)
+    preds.to_csv('./submission_4.csv', index=False)

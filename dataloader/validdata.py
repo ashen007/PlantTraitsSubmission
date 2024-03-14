@@ -4,6 +4,7 @@ warnings.filterwarnings('ignore')
 
 import os.path
 import pandas as pd
+import numpy as np
 import torch
 import matplotlib.pyplot as plt
 import cv2
@@ -17,6 +18,13 @@ class PlantTraitValidDataset(Dataset):
         self.columns = ['X4_mean', 'X11_mean', 'X18_mean', 'X50_mean', 'X26_mean', 'X3112_mean']
         self.dir = os.path.join(path, 'train_images')
         self.df = pd.read_csv(os.path.join(path, 'processed/valid.csv'))
+
+        self.df['box'] = self.df['box'].apply(
+            lambda x: np.fromstring(x.replace('\n', '').replace('[', '').replace(']', '').replace('  ', ' '), sep=' ')
+        )
+
+        self.boxes = self.df.pop('box')
+
         self.xs = pd.read_csv(os.path.join(path, 'processed/train_x.csv')).drop('id', axis=1)
         self.xs_cols = self.xs.columns
         self.transform = transform
@@ -31,6 +39,11 @@ class PlantTraitValidDataset(Dataset):
 
         img = cv2.imread(f'{self.dir}/{img_id}.jpeg')
         img = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
+
+        box = self.boxes.loc[idx]
+        img = img[int(box[1]):int(box[3]), int(box[0]):int(box[2])]
+
+        # print(img.shape)
 
         if self.transform:
             augmented = TEST_TRANSFORMER(image=img)

@@ -2,6 +2,7 @@ import numpy as np
 import torch
 import joblib
 import pandas as pd
+import matplotlib.pyplot as plt
 import imageio.v3 as imageio
 from torch.utils.data import Dataset, DataLoader
 from dataloader.transformers import TEST_TRANSFORMER
@@ -14,15 +15,27 @@ class TestDataset(Dataset):
         self.y = y
         self.transforms = TEST_TRANSFORMER
         self.xs_cols = x_features.columns
-        self.scaling = joblib.load('../../data/processed/scaler_x.joblib')
-        self.Xs = self.scaling.transform(x_features.loc[:, self.xs_cols[1:-2]])
+        self.scaling = joblib.load('../../data/processed/scaler.joblib')
+        self.Xs = self.scaling.transform(x_features.loc[:, self.xs_cols[:6]])
+        self.boxes = pd.read_csv('../../data/boxes_test.csv', index_col='id')
+
+        self.boxes['box'] = self.boxes['box'].apply(
+            lambda x: np.fromstring(x.replace('\n', '').replace('[', '').replace(']', '').replace('  ', ' '), sep=' ')
+        )
 
     def __len__(self):
         return len(self.X_jpeg_bytes)
 
     def __getitem__(self, index):
-        X_sample = self.transforms(
-            image=imageio.imread(self.X_jpeg_bytes[index]))['image']
+        try:
+            box = self.boxes.loc[self.y[index], 'box']
+            X_sample = self.transforms(
+                image=imageio.imread(self.X_jpeg_bytes[index])[int(box[1]):int(box[3]), int(box[0]):int(box[2])])[
+                'image']
+        except:
+            X_sample = self.transforms(
+                image=imageio.imread(self.X_jpeg_bytes[index]))['image']
+
         xs = np.asarray(self.Xs[index, :])
         y_sample = self.y[index]
 
@@ -43,3 +56,7 @@ if __name__ == '__main__':
     print(len(loader))
     print(x1.shape)
     print(x2.shape)
+
+    plt.figure()
+    plt.imshow(x1[0].permute(1, 2, 0).numpy())
+    plt.show()
