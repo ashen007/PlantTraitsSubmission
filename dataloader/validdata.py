@@ -25,7 +25,7 @@ class PlantTraitValidDataset(Dataset):
 
         self.boxes = self.df.pop('box')
 
-        self.xs = pd.read_csv(os.path.join(path, 'processed/train_x.csv')).drop('id', axis=1)
+        self.xs = pd.read_csv(os.path.join(path, 'processed/valid_x.csv')).drop('id', axis=1)
         self.xs_cols = self.xs.columns
         self.transform = transform
 

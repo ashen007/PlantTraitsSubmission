@@ -40,17 +40,22 @@ class Compile(object):
         self.optimizer = optimizer(params=model.parameters(),
                                    lr=init_lr,
                                    weight_decay=weight_decay)
-        self.lr_scheduler = torch.optim.lr_scheduler.OneCycleLR(self.optimizer,
-                                                                init_lr * 10,
-                                                                steps_per_epoch=len(train_loader),
-                                                                epochs=epochs,
-                                                                pct_start=0.1,
-                                                                anneal_strategy='cos',
-                                                                div_factor=1e3,
-                                                                final_div_factor=1e4)
+        # self.lr_scheduler = torch.optim.lr_scheduler.OneCycleLR(self.optimizer,
+        #                                                         init_lr * 10,
+        #                                                         steps_per_epoch=len(train_loader),
+        #                                                         epochs=epochs,
+        #                                                         pct_start=0.1,
+        #                                                         anneal_strategy='cos',
+        #                                                         div_factor=1e3,
+        #                                                         final_div_factor=1e4)
         # self.lr_scheduler = torch.optim.lr_scheduler.CosineAnnealingLR(self.optimizer,
         #                                                                len(train_loader),
         #                                                                0)
+        self.lr_scheduler = torch.optim.lr_scheduler.ReduceLROnPlateau(self.optimizer,
+                                                                       factor=0.5,
+                                                                       patience=3,
+                                                                       cooldown=3,
+                                                                       verbose=True)
         self.metrics = metrics
         self.train_loader = train_loader
         self.val_loader = val_loader
@@ -84,8 +89,6 @@ class Compile(object):
                 for key, val in self.metrics.items():
                     val.update(y_pred, Y)
 
-                self.lr_scheduler.step()
-
             dtl = [f'{key}: {val.compute().item():.7f}' for key, val in self.metrics.items()]
             print(f"epoch: {epoch + 1}, "
                   f"training loss: {self.track_loss.avg:.7f}, ",
@@ -115,6 +118,8 @@ class Compile(object):
                 print(f"epoch: {epoch + 1}, "
                       f"validation loss: {self.track_loss.avg:.7f}",
                       " ".join(dtl))
+
+            self.lr_scheduler.step(self.track_loss.avg)
 
             torch.save({'model_state_dict': self.model.state_dict(),
                         }, 'last_checkpoint.pth')

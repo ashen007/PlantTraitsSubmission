@@ -43,7 +43,7 @@ class PlantTraitDataset(Dataset):
         box = self.boxes.loc[idx]
         img = img[int(box[1]):int(box[3]), int(box[0]):int(box[2])]
 
-        print(img.shape)
+        # print(img.shape)
 
         if self.transform:
             augmented = TRANSFORMER(image=img)

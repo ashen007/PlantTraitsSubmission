@@ -15,8 +15,8 @@ class TestDataset(Dataset):
         self.y = y
         self.transforms = TEST_TRANSFORMER
         self.xs_cols = x_features.columns
-        self.scaling = joblib.load('../../data/processed/scaler.joblib')
-        self.Xs = self.scaling.transform(x_features.loc[:, self.xs_cols[:6]])
+        self.scaling = joblib.load('../../data/processed/scaler_x.joblib')
+        self.Xs = pd.DataFrame(self.scaling.transform(x_features.loc[:, self.xs_cols[1:-2]].values)).set_index(x_features['id'])
         self.boxes = pd.read_csv('../../data/boxes_test.csv', index_col='id')
 
         self.boxes['box'] = self.boxes['box'].apply(
@@ -36,7 +36,7 @@ class TestDataset(Dataset):
             X_sample = self.transforms(
                 image=imageio.imread(self.X_jpeg_bytes[index]))['image']
 
-        xs = np.asarray(self.Xs[index, :])
+        xs = np.asarray(self.Xs.loc[self.y[index], :])
         y_sample = self.y[index]
 
         return ((move_to(X_sample, 'cuda').unsqueeze(0),
@@ -56,7 +56,4 @@ if __name__ == '__main__':
     print(len(loader))
     print(x1.shape)
     print(x2.shape)
-
-    plt.figure()
-    plt.imshow(x1[0].permute(1, 2, 0).numpy())
-    plt.show()
+    print(y)
