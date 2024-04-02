@@ -5,16 +5,16 @@ from dataloader.plantdata import PlantTraitDataset
 from torch.utils.data import DataLoader
 
 
-class CustomEffnet(nn.Module):
+class SwinTransformer(nn.Module):
     def __init__(self):
-        super(CustomEffnet, self).__init__()
+        super(SwinTransformer, self).__init__()
 
-        backbone = timm.create_model('efficientvit_b2.r288_in1k',
+        backbone = timm.create_model('swin_base_patch4_window12_384.ms_in22k_ft_in1k',
                                      pretrained=True)
 
         self.model = nn.Sequential(*(list(backbone.children())[:-1]))
         self.fc = nn.Sequential(*(list(list(backbone.children())[-1].children())[:-1]))
-        self.out_layer = nn.Sequential(nn.Linear(2304, 6))
+        self.out_layer = nn.Sequential(nn.Linear(1000, 6))
 
         # self.reg = nn.Sequential(nn.Linear(384, 1024),
         #                          nn.LayerNorm(1024),
@@ -36,16 +36,16 @@ class CustomEffnet(nn.Module):
 
 if __name__ == '__main__':
     dataset = PlantTraitDataset('../data')
-    x, y = next(iter(DataLoader(dataset, 32, True)))
+    x, y = next(iter(DataLoader(dataset, 16, True)))
 
     # print(x.shape, y.shape)
 
-    m = CustomEffnet()
+    m = SwinTransformer()
     main = m(x)
 
-    loss = nn.MSELoss()
+    # loss = nn.MSELoss()
 
-    loss_score = torch.sqrt(loss(main.cuda(), y.cuda()))
+    # loss_score = torch.sqrt(loss(main.cuda(), y.cuda()))
 
     print(main.shape)
-    print(loss_score)
+    # print(loss_score)

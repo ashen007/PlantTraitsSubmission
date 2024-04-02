@@ -54,20 +54,55 @@ class PlantTraitDataset(Dataset):
                 y)
 
 
+class PlantTraitDataset2023(Dataset):
+
+    def __init__(self, path, transform=True, full_y=False):
+        self.dir = os.path.join(path, '01_data_train')
+        self.df = pd.read_csv(os.path.join(path, 'processed/train.csv'))
+        self.pic_names = self.df.pop('pic_name')
+        self.transform = transform
+        self.full_y = full_y
+
+    def __len__(self):
+        return len(self.df)
+
+    def __getitem__(self, idx):
+        if not self.full_y:
+            y = torch.tensor(self.df.loc[idx, :].values[:6], dtype=torch.float32)
+
+        else:
+            y = torch.tensor(self.df.loc[idx, :].values, dtype=torch.float32)
+
+        img = cv2.imread(f'{self.dir}/{self.pic_names[idx]}')
+        img = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
+
+        if self.transform:
+            augmented = TRANSFORMER(image=img)
+            img = augmented['image']
+
+        return (img, y), y
+
+
 if __name__ == '__main__':
     dataset = PlantTraitDataset('../data')
-    loader = DataLoader(dataset, 1, True)
+    dataset_23 = PlantTraitDataset2023('../data/2023/', full_y=True)
+    # loader = DataLoader(dataset, 1, True)
+    loader = DataLoader(dataset_23, 1, True)
 
+    # (x1, x2), y = next(iter(loader))
     (x1, x2), y = next(iter(loader))
-    print(len(loader))
+
+    # print(len(loader))
+    # print(x1.shape)
+    # print(x2.shape)
+
     print(x1.shape)
-    print(x2.shape)
-
-    print(x2)
-
-    print(y)
     print(y.shape)
 
-    plt.figure()
-    plt.imshow(x1[0].permute(1, 2, 0).numpy())
-    plt.show()
+    # print(x2)
+    print(y)
+    # print(y.shape)
+
+    # plt.figure()
+    # plt.imshow(x1[0].permute(1, 2, 0).numpy())
+    # plt.show()
