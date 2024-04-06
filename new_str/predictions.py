@@ -3,11 +3,9 @@ import os
 import torch
 import pandas as pd
 import tqdm
-import albumentations as A
-import cv2
 import joblib
 
-from models.convnext import CustomConvNext
+from models.effnet import CustomEffnet
 from dataloader.testdata import TestDataset
 
 if __name__ == '__main__':
@@ -15,11 +13,11 @@ if __name__ == '__main__':
     log_features = ['X11_mean', 'X18_mean', 'X50_mean', 'X26_mean', 'X3112_mean']
 
     # load model
-    state = torch.load('best_checkpoint.pth')
-    model = CustomConvNext()
+    model = CustomEffnet()
+    state = torch.load('step_5/best_checkpoint.pth')
     model.load_state_dict(state['model_state_dict'])
 
-    df = pd.read_pickle('../../data/test.pkl')
+    df = pd.read_pickle('../../../data/test.pkl')
     pipe = joblib.load('../../data/processed/scaler.joblib')
     test_dataset = TestDataset(df['jpeg_bytes'].values, df, df['id'].values)
     preds = []
@@ -32,6 +30,8 @@ if __name__ == '__main__':
             y = model(x).detach().cpu().numpy()
 
         logits = pipe.inverse_transform(y).squeeze()
+        logits = logits[:6]
+
         row = {'id': idx}
 
         for k, v in zip(tar_features, logits):
@@ -47,4 +47,4 @@ if __name__ == '__main__':
     preds = pd.DataFrame(preds)
 
     # restore to original scale
-    preds.to_csv('./submission_1.csv', index=False)
+    preds.to_csv('./subs/submission_5.csv', index=False)

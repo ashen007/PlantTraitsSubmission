@@ -16,15 +16,6 @@ class SwinTransformer(nn.Module):
         self.fc = nn.Sequential(*(list(list(backbone.children())[-1].children())[:-1]))
         self.out_layer = nn.Sequential(nn.Linear(1000, 6))
 
-        # self.reg = nn.Sequential(nn.Linear(384, 1024),
-        #                          nn.LayerNorm(1024),
-        #                          nn.ReLU(),
-        #                          nn.Dropout(0.5),
-        #                          nn.Linear(1024, 1024),
-        #                          nn.LayerNorm(1024),
-        #                          nn.ReLU(),
-        #                          nn.Dropout(0.4),
-        #                          nn.Linear(1024, 6))
 
     def forward(self, x):
         x_ = self.model(x[0])
