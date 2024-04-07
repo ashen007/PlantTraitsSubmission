@@ -17,7 +17,7 @@ class PlantTraitDataset(Dataset):
     def __init__(self, path, transform=True):
         self.columns = ['X4_mean', 'X11_mean', 'X18_mean', 'X50_mean', 'X26_mean', 'X3112_mean']
         self.dir = os.path.join(path, 'train_images')
-        self.df = pd.read_csv(os.path.join('../../smoothed_targets/fold_1/', 'train.csv'))
+        self.df = pd.read_csv(os.path.join(path, 'processed/train.csv'))
 
         self.df['box'] = self.df['box'].apply(
             lambda x: np.fromstring(x.replace('\n', '').replace('[', '').replace(']', '').replace('  ', ' '), sep=' ')
