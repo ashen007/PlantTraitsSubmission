@@ -15,9 +15,9 @@ class TestDataset(Dataset):
         self.y = y
         self.transforms = TEST_TRANSFORMER
         self.xs_cols = x_features.columns
-        self.scaling = joblib.load('../../data/processed/scaler_x.joblib')
-        self.Xs = pd.DataFrame(self.scaling.transform(x_features.loc[:, self.xs_cols[1:-2]].values)).set_index(x_features['id'])
-        self.boxes = pd.read_csv('../../data/boxes_test.csv', index_col='id')
+        # self.scaling = joblib.load('../../data/processed/scaler_x.joblib')
+        # self.Xs = pd.DataFrame(self.scaling.transform(x_features.loc[:, self.xs_cols[1:-2]].values)).set_index(x_features['id'])
+        self.boxes = pd.read_csv('../data/2024/boxes_test.csv', index_col='id')
 
         self.boxes['box'] = self.boxes['box'].apply(
             lambda x: np.fromstring(x.replace('\n', '').replace('[', '').replace(']', '').replace('  ', ' '), sep=' ')
@@ -36,13 +36,10 @@ class TestDataset(Dataset):
             X_sample = self.transforms(
                 image=imageio.imread(self.X_jpeg_bytes[index]))['image']
 
-        xs = np.asarray(self.Xs.loc[self.y[index], :])
+        # xs = np.asarray(self.Xs.loc[self.y[index], :])
         y_sample = self.y[index]
 
-        return ((move_to(X_sample, 'cuda').unsqueeze(0),
-                 move_to(torch.tensor(xs, dtype=torch.float32), 'cuda').unsqueeze(0)
-                 ),
-                y_sample)
+        return move_to(X_sample, 'cuda').unsqueeze(0), y_sample
 
 
 if __name__ == '__main__':

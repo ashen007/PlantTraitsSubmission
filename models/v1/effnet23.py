@@ -35,7 +35,7 @@ class CustomEffnetFullY(nn.Module):
 
 
 if __name__ == '__main__':
-    dataset = PlantTraitDataset2023('../data/2023/')
+    dataset = PlantTraitDataset2023('../../data/2023/')
     x1, y = next(iter(DataLoader(dataset, 1, True)))
 
     # print(x.shape, y.shape)

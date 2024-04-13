@@ -1,7 +1,6 @@
-import timm
 import torch
 from torch import nn
-from models.effnet import CustomEffnet
+from models.v1.effnet import CustomEffnet
 from dataloader.plantdata import PlantTraitDataset2023
 from torch.utils.data import DataLoader
 
@@ -26,7 +25,7 @@ class CustomEffnetS2(nn.Module):
 
 
 if __name__ == '__main__':
-    dataset = PlantTraitDataset2023('../data/2023/')
+    dataset = PlantTraitDataset2023('../../data/2023/')
     x, y = next(iter(DataLoader(dataset, 32, True)))
 
     print(x.shape, y.shape)

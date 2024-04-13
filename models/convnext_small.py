@@ -1,17 +1,16 @@
 import timm
-import torch
 import pandas as pd
 from torch import nn
-from dataloader.PlantTriatData import PlantDataset
 from dataloader.transformers import TRANSFORMER
+from dataloader.PlantTriatData import PlantDataset
 from torch.utils.data import DataLoader
 
 
-class EffNet(nn.Module):
+class ConvNext(nn.Module):
     def __init__(self):
-        super(EffNet, self).__init__()
+        super(ConvNext, self).__init__()
 
-        self.model = timm.create_model('efficientvit_l2.r288_in1k',
+        self.model = timm.create_model('convnextv2_base.fcmae_ft_in22k_in1k_384',
                                        pretrained=True,
                                        num_classes=6)
 
@@ -26,7 +25,7 @@ if __name__ == '__main__':
     dataset = PlantDataset(df, TRANSFORMER)
     x, y = next(iter(DataLoader(dataset, 16, True)))
 
-    m = EffNet()
+    m = ConvNext()
     main = m(x)
 
     print(main.shape)

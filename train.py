@@ -40,7 +40,8 @@ class Compile(object):
         self.loss = loss()
         self.optimizer = optimizer(params=model.parameters(),
                                    lr=init_lr,
-                                   weight_decay=weight_decay)
+                                   # weight_decay=weight_decay
+                                   )
         # self.lr_scheduler = torch.optim.lr_scheduler.OneCycleLR(self.optimizer,
         #                                                         init_lr,
         #                                                         steps_per_epoch=len(train_loader),

@@ -1,24 +1,25 @@
 import os
 
+import numpy as np
 import torch
 import pandas as pd
 import tqdm
 import joblib
 
-from models.effnet import CustomEffnet
+from models.convnext_small import ConvNext
 from dataloader.testdata import TestDataset
 
 if __name__ == '__main__':
     tar_features = ['X4_mean', 'X11_mean', 'X18_mean', 'X50_mean', 'X26_mean', 'X3112_mean']
-    log_features = ['X11_mean', 'X18_mean', 'X50_mean', 'X26_mean', 'X3112_mean']
+    log_features = ['X18_mean','X26_mean','X3112_mean']
 
     # load model
-    model = CustomEffnet()
-    state = torch.load('step_5/best_checkpoint.pth')
+    model = ConvNext()
+    state = torch.load('./ckpts/best_ckpt_1.pth')
     model.load_state_dict(state['model_state_dict'])
 
-    df = pd.read_pickle('../../../data/test.pkl')
-    pipe = joblib.load('../../data/processed/scaler.joblib')
+    df = pd.read_pickle('../data/2024/processed/test.pkl')
+    pipe = joblib.load('../data/norm.joblib')
     test_dataset = TestDataset(df['jpeg_bytes'].values, df, df['id'].values)
     preds = []
 
@@ -37,7 +38,7 @@ if __name__ == '__main__':
         for k, v in zip(tar_features, logits):
 
             if k in log_features:
-                row[k.replace('_mean', '')] = 10 ** v
+                row[k.replace('_mean', '')] = np.exp(v)
 
             else:
                 row[k.replace('_mean', '')] = v
@@ -47,4 +48,4 @@ if __name__ == '__main__':
     preds = pd.DataFrame(preds)
 
     # restore to original scale
-    preds.to_csv('./subs/submission_5.csv', index=False)
+    preds.to_csv('./submission_1.csv', index=False)

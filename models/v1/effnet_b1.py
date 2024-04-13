@@ -1,9 +1,7 @@
 import timm
-import torch
-from torch import nn
 from dataloader.plantdata import PlantTraitDataset
 from torch.utils.data import DataLoader
-from models.dolg import *
+from models.v1.dolg import *
 
 
 class CustomEffnetVitB1(nn.Module):
@@ -34,7 +32,7 @@ class CustomEffnetVitB1(nn.Module):
 
 
 if __name__ == '__main__':
-    dataset = PlantTraitDataset('../data')
+    dataset = PlantTraitDataset('../../data')
     x, y = next(iter(DataLoader(dataset, 32, True)))
 
     # print(x.shape, y.shape)

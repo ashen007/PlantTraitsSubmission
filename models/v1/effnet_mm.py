@@ -41,7 +41,7 @@ class CustomEffnetMM(nn.Module):
 
 
 if __name__ == '__main__':
-    dataset = PlantTraitDataset('../data')
+    dataset = PlantTraitDataset('../../data')
     x, y = next(iter(DataLoader(dataset, 32, True)))
 
     print(x[0].shape, y.shape)
