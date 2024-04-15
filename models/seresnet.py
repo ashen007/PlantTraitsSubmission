@@ -6,11 +6,11 @@ from dataloader.PlantTriatData import PlantDataset
 from torch.utils.data import DataLoader
 
 
-class ConvNext(nn.Module):
+class SeResNet(nn.Module):
     def __init__(self):
-        super(ConvNext, self).__init__()
+        super(SeResNet, self).__init__()
 
-        self.model = timm.create_model('convnext_small.in12k_ft_in1k_384',
+        self.model = timm.create_model('seresnextaa101d_32x8d.sw_in12k_ft_in1k',
                                        pretrained=True,
                                        num_classes=6)
 
@@ -23,9 +23,9 @@ class ConvNext(nn.Module):
 if __name__ == '__main__':
     df = pd.read_csv('../data/train.csv')
     dataset = PlantDataset(df, TRANSFORMER)
-    x, y = next(iter(DataLoader(dataset, 4, True)))
+    x, y = next(iter(DataLoader(dataset, 32, True)))
 
-    m = ConvNext()
+    m = SeResNet()
     main = m(x)
 
     print(main.shape)
