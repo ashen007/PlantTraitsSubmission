@@ -1,5 +1,5 @@
 import os.path
-
+import numpy as np
 import matplotlib.pyplot as plt
 import pandas as pd
 import imageio.v3 as imageio
@@ -13,24 +13,30 @@ class PlantDataset(Dataset):
     def __init__(self, df, transformers):
         self.df = df
         self.trans = transformers
+        self.names = ['X4', 'X11', 'X18', 'X26', 'X50', 'X3112']
+        self.y_means = [f'{y}_mean' for y in self.names]
+        self.y_std = [f'{y}_sd' for y in self.names]
+        self.epsilon_range = (-0.01, 0.01)
 
     def __len__(self):
         return len(self.df)
 
     def __getitem__(self, idx):
-        if idx >= len(self): raise IndexError
-
         path = f"../data{self.df.loc[idx, 'path']}"
         image_file = imageio.imread(path)
+        alpha = np.random.uniform(self.epsilon_range[0],
+                                  self.epsilon_range[1])
+
+        Ys = (np.asarray(df.iloc[idx, self.y_means].values) +
+              alpha * np.asarray(df.iloc[idx, self.y_std].values))
 
         X = self.trans(image=image_file)['image']
-        Y = list(self.df.iloc[idx, 1:].values)
 
-        return X.unsqueeze(0), torch.tensor(Y, dtype=torch.float32).unsqueeze(0)
+        return X, torch.tensor(Ys, dtype=torch.float32)
 
 
 if __name__ == '__main__':
-    df = pd.read_csv('../data/test.csv')
+    df = pd.read_csv('../data/train.csv')
     dataset = PlantDataset(df, TRANSFORMER)
 
     img, y = dataset[0]

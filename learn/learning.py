@@ -16,8 +16,8 @@ folds = KFold(shuffle=True, random_state=48)
 df_train = pd.read_csv('../data/train.csv')
 df_valid = pd.read_csv('../data/valid.csv')
 
-train_dataloader = DataLoader(PlantDataset(df_train, TRANSFORMER), shuffle=True, batch_size=32, drop_last=True)
-oob_valid_dataloader = DataLoader(PlantDataset(df_valid, TEST_TRANSFORMER), shuffle=True, batch_size=32, drop_last=True)
+train_dataloader = DataLoader(PlantDataset(df_train, TRANSFORMER), shuffle=True, batch_size=8, drop_last=True)
+oob_valid_dataloader = DataLoader(PlantDataset(df_valid, TEST_TRANSFORMER), shuffle=True, batch_size=8, drop_last=True)
 
 
 def k_fold_train(folds, model):
@@ -71,18 +71,18 @@ def k_fold_train(folds, model):
 
 def full_batch_train(model):
     model = model()
-    # state = torch.load(f'./folds/best_ckpt.pth')
-    # model.load_state_dict(state['model_state_dict'])
+    state = torch.load(f'./folds/best_ckpt_380.pth')
+    model.load_state_dict(state['model_state_dict'])
 
     learner = Compile(model,
                       torch.nn.SmoothL1Loss,
                       torch.optim.AdamW,
                       3.75e-5,
                       1e-4,
-                      10,
-                      32,
+                      3,
+                      8,
                       train_dataloader,
-                      f'./folds/best_ckpt.pth',
+                      f'./folds/best_ckpt_512.pth',
                       oob_valid_dataloader,
                       {'r2': R2Score(6).cuda()})
 
