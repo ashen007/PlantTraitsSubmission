@@ -26,7 +26,7 @@ class PlantDataset(Dataset):
         X = self.trans(image=image_file)['image']
         Y = list(self.df.iloc[idx, 1:].values)
 
-        return X.unsqueeze(0), torch.tensor(Y, dtype=torch.float32).unsqueeze(0)
+        return X, torch.tensor(Y, dtype=torch.float32)
 
 
 if __name__ == '__main__':

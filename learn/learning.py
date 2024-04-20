@@ -6,8 +6,9 @@ from torchmetrics.regression import R2Score
 from train import Compile
 from dataloader.transformers import TRANSFORMER, TEST_TRANSFORMER
 from dataloader.PlantTriatData import PlantDataset
-from models.convnext_small import ConvNext
+# from models.convnext_small import ConvNext
 # from models.effnet import EffNet
+from models.seresnet import SeResNet
 from sklearn.model_selection import KFold
 from move import move_to
 
@@ -16,8 +17,8 @@ folds = KFold(shuffle=True, random_state=48)
 df_train = pd.read_csv('../data/train.csv')
 df_valid = pd.read_csv('../data/valid.csv')
 
-train_dataloader = DataLoader(PlantDataset(df_train, TRANSFORMER), shuffle=True, batch_size=8, drop_last=True)
-oob_valid_dataloader = DataLoader(PlantDataset(df_valid, TEST_TRANSFORMER), shuffle=True, batch_size=8, drop_last=True)
+train_dataloader = DataLoader(PlantDataset(df_train, TRANSFORMER), shuffle=True, batch_size=16, drop_last=True)
+oob_valid_dataloader = DataLoader(PlantDataset(df_valid, TEST_TRANSFORMER), shuffle=True, batch_size=16, drop_last=True)
 
 
 def k_fold_train(folds, model):
@@ -71,18 +72,18 @@ def k_fold_train(folds, model):
 
 def full_batch_train(model):
     model = model()
-    state = torch.load(f'./folds/best_ckpt_380.pth')
-    model.load_state_dict(state['model_state_dict'])
+    # state = torch.load(f'./ckpts/best_ckpt_300_convnext.pth')
+    # model.load_state_dict(state['model_state_dict'])
 
     learner = Compile(model,
                       torch.nn.SmoothL1Loss,
                       torch.optim.AdamW,
                       3.75e-5,
                       1e-4,
-                      3,
-                      8,
+                      5,
+                      16,
                       train_dataloader,
-                      f'./folds/best_ckpt_512.pth',
+                      f'./ckpts/best_ckpt_seresnet_224.pth',
                       oob_valid_dataloader,
                       {'r2': R2Score(6).cuda()})
 
@@ -90,4 +91,4 @@ def full_batch_train(model):
 
 
 if __name__ == '__main__':
-    full_batch_train(ConvNext)
+    full_batch_train(SeResNet)
