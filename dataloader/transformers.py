@@ -33,7 +33,7 @@ TRANSFORMER = Compose([
     ToTensorV2(),
 ])
 
-TEST_TRANSFORMER = Compose([A.Resize(256, 256),
+TEST_TRANSFORMER = Compose([A.Resize(320, 320),
                             A.ToFloat(),
                             A.Normalize(
                                 mean=[0.485, 0.456, 0.406],

@@ -8,8 +8,8 @@ import joblib
 
 from move import move_to
 # from models.convnext_small import ConvNext
-# from models.seresnet import SeResNet
-from models.swin import SwinTrans
+from models.seresnet import SeResNet
+# from models.swin import SwinTrans
 from dataloader.testdata import PlantDataset
 # from dataloader.PlantTriatData import PlantDataset
 from dataloader.transformers import TEST_TRANSFORMER
@@ -20,12 +20,12 @@ if __name__ == '__main__':
     log_features = ['X11_mean', 'X18_mean', 'X26_mean', 'X50_mean', 'X3112_mean']
 
     # load model
-    model = SwinTrans()
-    state = torch.load('ckpts/best_ckpt_384_swin.pth')
+    model = SeResNet()
+    state = torch.load('ckpts/best_ckpt_288_seresnet_with_sd.pth')
     model.load_state_dict(state['model_state_dict'])
 
     df_test = pd.read_csv('../data/test.csv')
-    pipe = joblib.load('../data/scaler.joblib')
+    # pipe = joblib.load('../data/scaler.joblib')
 
     # df_valid = pd.read_csv('../data/valid.csv')
     test_dataset = PlantDataset(df_test, TEST_TRANSFORMER)
@@ -57,4 +57,4 @@ if __name__ == '__main__':
     preds = pd.DataFrame(preds)
 
     # restore to original scale
-    preds.to_csv('./submission_swin.csv', index=False)
+    preds.to_csv('./submission.csv', index=False)

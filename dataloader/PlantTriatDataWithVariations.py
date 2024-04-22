@@ -27,8 +27,8 @@ class PlantDataset(Dataset):
         alpha = np.random.uniform(self.epsilon_range[0],
                                   self.epsilon_range[1])
 
-        Ys = (np.asarray(df.iloc[idx, self.y_means].values) +
-              alpha * np.asarray(df.iloc[idx, self.y_std].values))
+        Ys = self.df.loc[idx, self.y_means].values + alpha * self.df.loc[idx, self.y_std].values
+        Ys = list(Ys)
 
         X = self.trans(image=image_file)['image']
 
@@ -36,10 +36,12 @@ class PlantDataset(Dataset):
 
 
 if __name__ == '__main__':
-    df = pd.read_csv('../data/train.csv')
+    df = pd.read_csv('../data/train_with_sd.csv')
     dataset = PlantDataset(df, TRANSFORMER)
 
     img, y = dataset[0]
+
+    print(y)
 
     plt.figure()
     plt.imshow(img.permute(1, 2, 0))
