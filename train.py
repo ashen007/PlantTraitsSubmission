@@ -90,10 +90,15 @@ class Compile(object):
                     self.optimizer.zero_grad()
                     self.lr_scheduler.step()
 
-                for key, val in self.metrics.items():
-                    val.update(y_pred, Y)
+                if self.metrics is not None:
+                    for key, val in self.metrics.items():
+                        val.update(y_pred, Y)
 
-            dtl = [f'{key}: {val.compute().item():.7f}' for key, val in self.metrics.items()]
+            if self.metrics is not None:
+                dtl = [f'{key}: {val.compute().item():.7f}' for key, val in self.metrics.items()]
+            else:
+                dtl = []
+
             print(f"epoch: {epoch + 1}, "
                   f"training loss: {self.track_loss.avg:.7f}, ",
                   " ".join(dtl))
@@ -115,10 +120,15 @@ class Compile(object):
                         loss = self.loss(y_pred, Y)
                         self.track_loss.update(loss)
 
-                    for key, val in self.metrics.items():
-                        val.update(y_pred, Y)
+                    if self.metrics is not None:
+                        for key, val in self.metrics.items():
+                            val.update(y_pred, Y)
 
-                dtl = [f'{key}: {val.compute().item():.7f}' for key, val in self.metrics.items()]
+                if self.metrics is not None:
+                    dtl = [f'{key}: {val.compute().item():.7f}' for key, val in self.metrics.items()]
+                else:
+                    dtl = []
+
                 print(f"epoch: {epoch + 1}, "
                       f"validation loss: {self.track_loss.avg:.7f}",
                       " ".join(dtl))

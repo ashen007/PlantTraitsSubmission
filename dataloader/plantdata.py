@@ -32,14 +32,13 @@ class PlantTraitDataset(Dataset):
     def __getitem__(self, idx):
         path = f"../data{self.df.loc[idx, 'path']}"
         image_file = imageio.imread(path)
+        box = self.boxes.loc[idx]
+        img = image_file[:, int(box[1]):int(box[3]), int(box[0]):int(box[2])]
 
-        X = self.trans(image=image_file)['image']
+        X = self.trans(image=img)['image']
         Y = list(self.df.loc[idx, self.columns].values)
 
-        box = self.boxes.loc[idx]
-        img = X[:, int(box[1]):int(box[3]), int(box[0]):int(box[2])]
-
-        return img, torch.tensor(Y, dtype=torch.float32)
+        return X, torch.tensor(Y, dtype=torch.float32)
 
 
 class PlantTraitDataset2023(Dataset):

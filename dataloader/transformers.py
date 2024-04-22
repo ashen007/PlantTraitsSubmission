@@ -1,3 +1,4 @@
+import cv2
 import albumentations as A
 from albumentations.core.composition import Compose, OneOf
 from albumentations.pytorch import ToTensorV2
@@ -33,6 +34,16 @@ TRANSFORMER = Compose([
     ToTensorV2(),
 ])
 
+INPAINT_TRANSFORMER = Compose([A.Resize(224, 224),
+                               A.ToFloat(),
+                               A.Normalize(
+                                   mean=[0.485, 0.456, 0.406],
+                                   std=[0.229, 0.224, 0.225],
+                                   max_pixel_value=1
+                               ),
+                               ToTensorV2(),
+                               ])
+
 TEST_TRANSFORMER = Compose([A.Resize(320, 320),
                             A.ToFloat(),
                             A.Normalize(
@@ -42,3 +53,26 @@ TEST_TRANSFORMER = Compose([A.Resize(320, 320),
                             ),
                             ToTensorV2(),
                             ])
+
+TEST_TIME_TRANSFORMER = Compose([A.Resize(320, 320),
+                                 A.RandomBrightnessContrast(0.1, 0.2, p=1.0),
+                                 A.OneOf([A.Blur(p=0.1),
+                                          A.GaussianBlur(p=0.1),
+                                          A.MotionBlur(p=0.1),
+                                          ], p=0.1),
+                                 A.VerticalFlip(p=0.5),
+                                 A.HorizontalFlip(p=0.5),
+                                 A.ShiftScaleRotate(shift_limit=0.2,
+                                                    scale_limit=0.2,
+                                                    rotate_limit=20,
+                                                    interpolation=cv2.INTER_LINEAR,
+                                                    border_mode=cv2.BORDER_REFLECT_101,
+                                                    p=1,
+                                                    ),
+                                 A.ToFloat(),
+                                 A.Normalize(
+                                     mean=[0.485, 0.456, 0.406],
+                                     std=[0.229, 0.224, 0.225],
+                                     max_pixel_value=1
+                                 ),
+                                 ToTensorV2(), ])
