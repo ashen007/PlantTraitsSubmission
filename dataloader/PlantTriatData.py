@@ -30,10 +30,12 @@ class PlantDataset(Dataset):
 
 
 if __name__ == '__main__':
-    df = pd.read_csv('../data/test.csv')
+    df = pd.read_csv('../data/train.csv')
     dataset = PlantDataset(df, TRANSFORMER)
 
     img, y = dataset[0]
+
+    print(y)
 
     plt.figure()
     plt.imshow(img.permute(1, 2, 0))
